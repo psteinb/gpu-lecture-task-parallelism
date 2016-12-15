@@ -12,18 +12,25 @@ TARGETS		= $(FILTERED_SRC:%.cu=%)
 
 all : $(TARGETS)
 
+rebuild : catch_main $(TARGETS)
+
 %.o : %.cu
-	$(NVCC) $(NVCC_FLAGS) $(NVCC_OPT_FLAGS) $(NVCC_SM_FLAGS) $? -c 
+	$(NVCC) $(NVCC_FLAGS) $(NVCC_OPT_FLAGS) $(NVCC_SM_FLAGS) $? -c
 
-% : main.o %.o 
-	$(NVCC) $(NVCC_FLAGS) $(NVCC_OPT_FLAGS) $(NVCC_SM_FLAGS) $? -o $@ 
 
-.PHONY: help clean
-help :
+catch_runner : main.o 
+
+% :  %.o catch_runner
+	$(NVCC) $(NVCC_FLAGS) $(NVCC_OPT_FLAGS) $(NVCC_SM_FLAGS) $< main.o -o $@ 
+
+debug :
 	@echo "NVCC           " $(NVCC)
 	@echo "TARGETS        " $(TARGETS)
 	@echo "NVCC_OPT_FLAGS " $(NVCC_OPT_FLAGS)
 	@echo "NVCC_SM_FLAGS  " $(NVCC_SM_FLAGS) 
 
 clean :
-	@rm $(TARGETS) $(FILTERED_OBJ) 
+	-rm -f $(TARGETS) $(FILTERED_OBJ) 
+
+.PHONY: help clean catch_runner 
+.SECONDARY: $(FILTERED_OBJ)
