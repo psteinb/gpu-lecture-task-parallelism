@@ -2,6 +2,7 @@
 #define TEST_FIXTURE_H
 
 #include <vector>
+#include <cstdint>
 
 #ifndef ARRAY_SIZE
 static const std::size_t n_elements = 16* 1024*1024;
@@ -11,15 +12,21 @@ static const std::size_t n_elements = ARRAY_SIZE;
 
 struct array_fixture {
 
-  std::vector<float> data;
+  std::vector<float> floats;
+  std::vector<std::int32_t> ints;
 
   array_fixture() :
-    data(n_elements,0){
+    floats(n_elements,0),
+    ints(n_elements,0){
 
     std::size_t counter = 0;
-    for( float& el : data )
-      el = counter++;
     
+    for( float& el : floats ){
+      el = counter;
+      ints[counter] = counter;
+      ++counter;
+    }
+
   }
   
 };
