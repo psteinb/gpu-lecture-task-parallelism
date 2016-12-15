@@ -1,6 +1,6 @@
 
 NVCC		?= nvcc
-NVCC_FLAGS	+= -ccbin g++ -m64 
+NVCC_FLAGS	+= -ccbin g++ -m64 --std=c++11
 NVCC_OPT_FLAGS 	?= -O2
 NVCC_SM_FLAGS  	?= -gencode arch=compute_35,code=sm_35
 
