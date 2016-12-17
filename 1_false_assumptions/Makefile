@@ -1,6 +1,6 @@
 
 NVCC		?= nvcc
-NVCC_FLAGS	+= -ccbin g++ -m64 --std=c++11 -I. -I..
+NVCC_FLAGS	+= -ccbin g++ -m64 --std=c++11 -I. -I.. -Xcompiler "-D_GLIBCXX_USE_CXX11_ABI=0"  -Xcompiler "-fopenmp"
 NVCC_OPT_FLAGS 	?= -O2
 NVCC_SM_FLAGS  	?= -gencode arch=compute_35,code=sm_35
 
