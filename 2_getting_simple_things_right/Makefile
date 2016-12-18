@@ -2,7 +2,7 @@
 NVCC		?= nvcc
 NVCC_FLAGS	+= -ccbin g++ -m64 --std=c++11 -I. -I.. -Xcompiler "-D_GLIBCXX_USE_CXX11_ABI=0"  -Xcompiler "-fopenmp"
 NVCC_OPT_FLAGS 	?= -O2
-NVCC_SM_FLAGS  	?= -gencode arch=compute_35,code=sm_35
+NVCC_SM_FLAGS  	?= -gencode arch=compute_37,code=sm_37
 
 SRC_FILES	= $(wildcard *.cu)
 FILTERED_SRC    = $(filter-out main.cu,$(SRC_FILES))

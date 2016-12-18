@@ -18,7 +18,7 @@ double increment_by_two(std::int32_t* data,
 {
 
   const int nbytes = size * sizeof(std::int32_t);
-  const int value = 2;
+  const int value = 8;
 
   // allocate device memory
   int *d_a=0;
@@ -27,7 +27,7 @@ double increment_by_two(std::int32_t* data,
 
   // set kernel launch configuration
   dim3 threads = dim3(512, 1);
-  dim3 blocks  = dim3(size / threads.x, 1);
+  dim3 blocks  = dim3(4*8, 1);
 
   auto start = std::chrono::high_resolution_clock::now();
 
@@ -43,14 +43,15 @@ double increment_by_two(std::int32_t* data,
   return diff.count();
 }
 
-#include "omp.h"
-double omp_increment_by_two(std::int32_t* data,
+//#include "omp.h"
+double streamed_increment_by_two(std::int32_t* data,
 				 std::size_t size)
 {
 
   const int nbytes = size * sizeof(std::int32_t);
-  const int value = 1;
-
+  const int value = 8;
+  //const std::size_t half = size/2;
+  
   // allocate device memory
   int *d_a=0;
   checkCudaErrors(cudaMalloc((void **)&d_a, nbytes));
@@ -58,26 +59,27 @@ double omp_increment_by_two(std::int32_t* data,
 
   // set kernel launch configuration
   dim3 threads = dim3(512, 1);
-  dim3 blocks  = dim3(size / threads.x, 1);
-  
-  omp_set_num_threads(2);
+  dim3 blocks  = dim3(4, 1);
+  std::cout << "threads = "<< threads.x <<", blocks = " << blocks.x << " of " << size << " elements\n";
   
   auto start = std::chrono::high_resolution_clock::now();
   cudaMemcpy(d_a, data, nbytes, cudaMemcpyHostToDevice);
 
-#pragma omp parallel
-  {
-    cudaStream_t stream;
+  std::vector<cudaStream_t> streams(8);
+  for(cudaStream_t& stream : streams)
     cudaStreamCreate(&stream);
-    increment_kernel<<<blocks, threads,0,stream>>>(d_a, value);
-    cudaStreamDestroy(stream);
-  }
+
+  for(int i = 0;i<streams.size();i++)
+    increment_kernel<<<blocks, threads,0,streams[i]>>>(d_a + i*threads.x*blocks.x, value);
 
   cudaMemcpy(data, d_a, nbytes, cudaMemcpyDeviceToHost);
   auto end = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> diff = end-start;
 
   checkCudaErrors(cudaFree(d_a));
+  for(cudaStream_t& stream : streams)
+    cudaStreamDestroy(stream);
+
   return diff.count();
 }
 
@@ -93,33 +95,34 @@ TEST_CASE_METHOD(array_fixture, "increment_works" ) {
   
     
   REQUIRE(value0 != ints[0]);
-  REQUIRE(value0 + 2 == ints[0]);
+  REQUIRE(value0 + 8 == ints[0]);
  
 }
 
-TEST_CASE_METHOD(array_fixture, "omp_increment_works" ) {
+TEST_CASE_METHOD(array_fixture, "streamed_increment_works" ) {
 
   const int value0 = ints[0];
   REQUIRE(ints[0]==0);
   
-  double timing = omp_increment_by_two(ints.data(),ints.size());
+  double timing = streamed_increment_by_two(ints.data(),ints.size());
 
   REQUIRE(timing > 0.);
       
   REQUIRE(value0 != ints[0]);
-  REQUIRE(value0 + 2 == ints[0]);
+  REQUIRE(value0 + 8 == ints[0]);
  
 }
 
-TEST_CASE_METHOD(array_fixture, "omp_faster" ) {
+TEST_CASE_METHOD(array_fixture, "streamed_faster" ) {
 
   //warm-up
   increment_by_two(ints.data(),ints.size());
   
-  double omp_timing = omp_increment_by_two(ints.data(),ints.size());
+  double streamed_timing = streamed_increment_by_two(ints.data(),ints.size());
   double ser_timing = increment_by_two(ints.data(),ints.size());
-
-  REQUIRE(omp_timing < ser_timing);
+  std::cout << "streamed_timing = " << streamed_timing << ", serial = " << ser_timing << "\n";
+    
+  REQUIRE(streamed_timing < ser_timing);
        
 }
 
