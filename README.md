@@ -7,7 +7,7 @@ Lecture given at TU Dresden on task parallelism with GPUs (CUDA, OpenACC).
 First, establish an interactive bash session on a gpu host (attention: the reservation flag will only work during class hours, omit them anytime else):
 
 ```
-$ srun --reservation=p_lv_cudaopencl_xx --pty --partition=gpu2-interactive -n 1 -c 1 --time=1:30:00 --mem-per-cpu=1700 --gres=gpu:1 bash
+$ srun -A p_lv_cudaopencl --reservation=p_lv_cudaopencl_xx --pty --partition=gpu2-interactive -n 1 -c 1 --time=1:30:00 --mem-per-cpu=1700 --gres=gpu:1 bash
 ```
 
 Second, please setup the correct environment (the defaul CUDA on taurus is version `8.0.44` which works at most with gcc `5.3.0`):
