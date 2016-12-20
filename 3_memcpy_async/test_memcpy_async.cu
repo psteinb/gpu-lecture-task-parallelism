@@ -47,11 +47,11 @@ double streamed_increment_by_one(std::int32_t* data,
 
   int nbytes = size * sizeof(std::int32_t);
   int value = 8;
-  const std::size chunk = size/2;
-  const std::size chunk_bytes = chunk*sizeof(std::int32_t);
+  const std::size_t chunk = size/2;
+  const std::size_t chunk_bytes = chunk*sizeof(std::int32_t);
   
   // allocate device memory
-  int *d_a=0;
+  int *d_a= nullptr;
   checkCudaErrors(cudaMalloc((void **)&d_a, nbytes));
   checkCudaErrors(cudaMemset(d_a, 255, nbytes));
   
@@ -59,8 +59,8 @@ double streamed_increment_by_one(std::int32_t* data,
   dim3 threads = dim3(512, 1);
   dim3 blocks  = dim3(chunk / threads.x, 1);
 
-  int h_a* = nullptr;
-  checkCudaErrors(cudaMallocHost(h_a, nbytes));
+  int * h_a = nullptr;
+  checkCudaErrors(cudaMallocHost(&h_a, nbytes));
   std::copy(data,
 	    data+size,
 	    h_a);
