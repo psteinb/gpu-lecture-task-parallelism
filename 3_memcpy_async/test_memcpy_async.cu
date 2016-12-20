@@ -57,10 +57,10 @@ double streamed_increment_by_one(std::int32_t* data,
   
   // set kernel launch configuration
   dim3 threads = dim3(512, 1);
-  dim3 blocks  = dim3(size / threads.x, 1);
+  dim3 blocks  = dim3(chunk / threads.x, 1);
 
   int h_a* = nullptr;
-  cudaMallocHost(h_a, nbytes);
+  checkCudaErrors(cudaMallocHost(h_a, nbytes));
   std::copy(data,
 	    data+size,
 	    h_a);
@@ -69,36 +69,39 @@ double streamed_increment_by_one(std::int32_t* data,
   
   std::vector<cudaStream_t> streams(2);
   for(cudaStream_t &str : streams){
-    cudaStreamCreate(&str);
+    checkCudaErrors(cudaStreamCreate(&str));
   }
 
   for(int i = 0;i<streams.size();++i){
-    cudaMemcpyAsync(d_a + i*chunk,
-		    data+i*chunk,
-		    chunk_bytes,
-		    cudaMemcpyHostToDevice,
-		    streams[i]);
+    checkCudaErrors(cudaMemcpyAsync(d_a + i*chunk,
+				    data+i*chunk,
+				    chunk_bytes,
+				    cudaMemcpyHostToDevice,
+				    streams[i])
+		    );
   }
   
   for(int i = 0;i<streams.size();++i){
     increment_kernel<<<blocks, threads,0,streams[i]>>>(d_a+i*chunk, value);
+    checkCudaErrors(cudaGetLastError());
   }
 
   for(int i = 0;i<streams.size();++i){
-    cudaMemcpyAsync(data+i*chunk,
-		    d_a + i*chunk,
-		    chunk_bytes,
-		    cudaMemcpyDeviceToHost,
-		    streams[i]);
+    checkCudaErrors(cudaMemcpyAsync(data+i*chunk,
+				    d_a + i*chunk,
+				    chunk_bytes,
+				    cudaMemcpyDeviceToHost,
+				    streams[i])
+		    );
   }
 
-  cudaMemcpy(data, d_a, nbytes, cudaMemcpyDeviceToHost);
+  checkCudaErrors(cudaDeviceSynchronize());
   auto end = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> diff = end-start;
 
   checkCudaErrors(cudaFree(d_a));
   for(cudaStream_t &str : streams){
-    cudaStreamDestroy(str);
+    checkCudaErrors(cudaStreamDestroy(str));
   }
 
   return diff.count();
