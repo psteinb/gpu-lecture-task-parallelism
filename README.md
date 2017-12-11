@@ -6,9 +6,15 @@ Lecture given at TU Dresden on task parallelism with GPUs (CUDA, OpenACC).
 
 First, establish an interactive bash session on a gpu host (attention: the reservation flag will only work during class hours, omit them anytime else):
 
-```
-$ srun -A p_lv_cudaopencl --reservation=p_lv_cudaopencl_xx --pty --partition=gpu2-interactive -n 1 -c 1 --time=1:30:00 --mem-per-cpu=1700 --gres=gpu:1 bash
-```
+  + for Dec 11, 2017 
+  ```
+  $ srun --reservation p_lv_cudaopencl_248 -A p_lv_cudaopencl -t 90 --mem=4000 --gres=gpu:1 --partition=gpu2-interactive --pty bash -l
+  ``` 
+  
+  + for Dec 12, 2017
+  ```
+  $ srun --reservation p_lv_cudaopencl_249 -A p_lv_cudaopencl -t 90 --mem=4000 --gres=gpu:1 --partition=gpu2-interactive --pty bash -l
+  ```
 
 Second, please setup the correct environment (the defaul CUDA on taurus is version `8.0.44` which works at most with gcc `5.3.0`):
 
@@ -38,18 +44,5 @@ $ ./test_simple_increment
 
 If this test passes, you are ready to go, if not, diagnose the problem. Feel free to post an issue to this repo if you are unable to solve the problem.
 
-# TUD specifics
-
-- use the GPU at your desk if possible
-- if you cannot do that, use the interactive GPUs on Taurus
-  + for Dec 11
-  ```
-  $ srun --reservation p_lv_cudaopencl_248 -A p_lv_cudaopencl -t 90 --mem=4000 --gres=gpu:1 --partition=gpu2-interactive --pty bash -l
-  ``` 
-  
-  + for Dec 12
-  ```
-  $ srun --reservation p_lv_cudaopencl_249 -A p_lv_cudaopencl -t 90 --mem=4000 --gres=gpu:1 --partition=gpu2-interactive --pty bash -l
-  ```
 
    
