@@ -44,9 +44,12 @@ If this test passes, you are ready to go, if not, diagnose the problem. Feel fre
 - if you cannot do that, use the interactive GPUs on Taurus
   + for Dec 11
   ```
-  $ srun --reservation p_lv_cudaopencl_248 -A p_lv_cudaopencl -t 90 --mem=4000 --gres=gpu:1 --partition=gpu2-interactive --pty bash -l                                            ``` 
+  $ srun --reservation p_lv_cudaopencl_248 -A p_lv_cudaopencl -t 90 --mem=4000 --gres=gpu:1 --partition=gpu2-interactive --pty bash -l
+  ``` 
+  
   + for Dec 12
   ```
-  $ srun --reservation p_lv_cudaopencl_249 -A p_lv_cudaopencl -t 90 --mem=4000 --gres=gpu:1 --partition=gpu2-interactive --pty bash -l                                            ```
+  $ srun --reservation p_lv_cudaopencl_249 -A p_lv_cudaopencl -t 90 --mem=4000 --gres=gpu:1 --partition=gpu2-interactive --pty bash -l
+  ```
 
    
