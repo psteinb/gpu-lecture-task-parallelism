@@ -58,7 +58,8 @@ double parallel_increment_by_one(std::int32_t* data,
   // allocate device memory
   int * h_a[2];
   for(int s = 0;s < streams.size();++s){
-    h_a[s] = data+s*(size/2);
+    checkCudaErrors(cudaHostAlloc((void **)&h_a[s], nbytes/2, cudaHostAllocPortable));
+    std::copy(data+s*(size/2), data+(s+1)*(size/2),h_a[s]);
   }
 
   // allocate device memory
@@ -87,6 +88,7 @@ double parallel_increment_by_one(std::int32_t* data,
 
   for(int s = 0;s < streams.size();++s){
     checkCudaErrors(cudaFree(d_a[s]));
+    std::copy(h_a[s],h_a[s]+size/2,data+s*(size/2));
     checkCudaErrors(cudaFreeHost(h_a[s]));
   }
 
