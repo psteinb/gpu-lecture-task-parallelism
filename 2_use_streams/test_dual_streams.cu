@@ -50,30 +50,31 @@ double parallel_increment_by_one(std::int32_t* data,
   int nbytes = size * sizeof(std::int32_t);
   int value = 1;
 
-  // allocate device memory
-  int *d_a=0;
-  checkCudaErrors(cudaMalloc((void **)&d_a, nbytes));
-  checkCudaErrors(cudaMemset(d_a, 255, nbytes));
-
-  // set kernel launch configuration
-  dim3 threads = dim3(512, 1);
-  dim3 blocks  = dim3(size / threads.x, 1);
-
-  std::vector<cudaStream_t> streams(4);
+  std::vector<cudaStream_t> streams(2);
   for( cudaStream_t& el : streams ){
     cudaStreamCreate(&el);
   }
 
-  auto start = std::chrono::high_resolution_clock::now();
-
-  cudaMemcpy(d_a, data, nbytes, cudaMemcpyHostToDevice);
-
+  // allocate device memory
+  int *d_a[2];
   for(int s = 0;s < streams.size();++s){
-    std::cout << "increment_kernel " << s << "/" << streams.size() << "\n";
-    increment_kernel<<<blocks, threads,0,streams[s]>>>(d_a, value);
+    checkCudaErrors(cudaMalloc((void **)&d_a[s], nbytes));
+    checkCudaErrors(cudaMemset(d_a[s], 255, nbytes));
   }
 
-  cudaMemcpy(data, d_a, nbytes, cudaMemcpyDeviceToHost);
+  // set kernel launch configuration
+  dim3 threads = dim3(512, 1);
+  dim3 blocks  = dim3(size / (2*threads.x), 1);
+
+
+  auto start = std::chrono::high_resolution_clock::now();
+
+  for(int s = 0;s < streams.size();++s){
+    cudaMemcpyAsync(d_a[s], data+s*(size/2), nbytes/2, cudaMemcpyHostToDevice, streams[s]);
+    increment_kernel<<<blocks, threads,0,streams[s]>>>(d_a[s], value);
+    cudaMemcpyAsync( data+s*(size/2),d_a[s], nbytes/2, cudaMemcpyDeviceToHost, streams[s]);
+  }
+
   auto end = std::chrono::high_resolution_clock::now();
 
   checkCudaErrors(cudaFree(d_a));
