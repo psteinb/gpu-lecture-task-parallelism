@@ -3,10 +3,9 @@
 
 #include "helper_cuda.h"
 
-#include "omp.h"
-
 #include <iostream>
 #include <chrono>
+#include <vector>
 
 __global__ void increment_kernel(int *g_data, int inc_value)
 {
@@ -60,15 +59,18 @@ double openmp_increment_by_one(std::int32_t* data,
   dim3 threads = dim3(512, 1);
   dim3 blocks  = dim3(size / threads.x, 1);
 
-  omp_set_num_threads(4);
+  std::vector<cudaStream_t> streams(4);
+  for( cudaStream_t& el : streams ){
+    cudaStreamCreate(&el);
+  }
+
   auto start = std::chrono::high_resolution_clock::now();
 
   cudaMemcpy(d_a, data, nbytes, cudaMemcpyHostToDevice);
 
-#pragma omp parallel
-  {
+  for(int s = 0;s < streams.size();++s){
     std::cout << "increment_kernel " << omp_get_thread_num() << "/" << omp_get_num_threads() << "\n";
-  increment_kernel<<<blocks, threads>>>(d_a, value);
+    increment_kernel<<<blocks, threads,0,streams[s]>>>(d_a, value);
   }
 
   cudaMemcpy(data, d_a, nbytes, cudaMemcpyDeviceToHost);
