@@ -69,7 +69,7 @@ double openmp_increment_by_one(std::int32_t* data,
   cudaMemcpy(d_a, data, nbytes, cudaMemcpyHostToDevice);
 
   for(int s = 0;s < streams.size();++s){
-    std::cout << "increment_kernel " << omp_get_thread_num() << "/" << omp_get_num_threads() << "\n";
+    std::cout << "increment_kernel " << s << "/" << streams.size() << "\n";
     increment_kernel<<<blocks, threads,0,streams[s]>>>(d_a, value);
   }
 
