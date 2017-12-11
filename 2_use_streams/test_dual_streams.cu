@@ -77,7 +77,9 @@ double parallel_increment_by_one(std::int32_t* data,
 
   auto end = std::chrono::high_resolution_clock::now();
 
-  checkCudaErrors(cudaFree(d_a));
+  for(int s = 0;s < streams.size();++s){
+    checkCudaErrors(cudaFree(d_a[s]));
+  }
 
   return (end - start).count();
 }
@@ -97,7 +99,7 @@ TEST_CASE_METHOD(array_fixture, "streams_increment_works" ) {
   parallel_increment_by_one(ints.data(), ints.size());
 
   REQUIRE(ints[0] != 0);
-  REQUIRE(ints[0] == 4);
+  REQUIRE(ints[0] == 1);
 
 }
 
@@ -107,7 +109,7 @@ TEST_CASE_METHOD(array_fixture, "compare_times" ) {
   auto parallel = parallel_increment_by_one(ints.data(), ints.size());
 
   REQUIRE(ints[0] != 0);
-  REQUIRE(ints[0] == 5);
+  REQUIRE(ints[0] == 2);
 
   REQUIRE(parallel < serial);
 }
