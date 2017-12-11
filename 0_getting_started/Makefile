@@ -1,8 +1,8 @@
 
 NVCC		?= nvcc
 NVCC_FLAGS	+= -ccbin g++ -m64 --std=c++11 -I. -I..
-NVCC_OPT_FLAGS 	?= -O2
-NVCC_SM_FLAGS  	?= -gencode arch=compute_35,code=sm_35
+CXXFLAGS 	?= -Xcompiler -fopenmp -O2
+SMS  	?= -gencode arch=compute_35,code=sm_35
 
 SRC_FILES	= $(wildcard *.cu)
 FILTERED_SRC    = $(filter-out main.cu,$(SRC_FILES))
@@ -15,19 +15,19 @@ all : $(TARGETS)
 rebuild : catch_main $(TARGETS)
 
 %.o : %.cu
-	$(NVCC) $(NVCC_FLAGS) $(NVCC_OPT_FLAGS) $(NVCC_SM_FLAGS) $? -c
+	$(NVCC) $(NVCC_FLAGS) $(CXXFLAGS) $(SMS) $? -c
 
 
 catch_runner : main.o 
 
 % :  %.o catch_runner
-	$(NVCC) $(NVCC_FLAGS) $(NVCC_OPT_FLAGS) $(NVCC_SM_FLAGS) $< main.o -o $@ 
+	$(NVCC) $(NVCC_FLAGS) $(CXXFLAGS) $(SMS) $< main.o -o $@
 
 debug :
 	@echo "NVCC           " $(NVCC)
 	@echo "TARGETS        " $(TARGETS)
-	@echo "NVCC_OPT_FLAGS " $(NVCC_OPT_FLAGS)
-	@echo "NVCC_SM_FLAGS  " $(NVCC_SM_FLAGS) 
+	@echo "CXXFLAGS       " $(CXXFLAGS)
+	@echo "NVCC_SM_FLAGS  " $(SMS)
 
 clean :
 	-rm -f $(TARGETS) $(FILTERED_OBJ) 

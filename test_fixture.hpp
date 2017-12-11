@@ -20,7 +20,7 @@ struct array_fixture {
     ints(n_elements,0){
 
     std::size_t counter = 0;
-    
+
     for( float& el : floats ){
       el = counter;
       ints[counter] = counter;
@@ -28,7 +28,7 @@ struct array_fixture {
     }
 
   }
-  
+
 };
 
 #endif /* TEST_FIXTURE_H */
