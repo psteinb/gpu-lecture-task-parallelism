@@ -37,3 +37,16 @@ $ ./test_simple_increment
 ```
 
 If this test passes, you are ready to go, if not, diagnose the problem. Feel free to post an issue to this repo if you are unable to solve the problem.
+
+# TUD specifics
+
+- use the GPU at your desk if possible
+- if you cannot do that, use the interactive GPUs on Taurus
+  + for Dec 11
+  ```
+  $ srun --reservation p_lv_cudaopencl_248 -A p_lv_cudaopencl -t 90 --mem=4000 --gres=gpu:1 --partition=gpu2-interactive --pty bash -l                                            ``` 
+  + for Dec 12
+  ```
+  $ srun --reservation p_lv_cudaopencl_249 -A p_lv_cudaopencl -t 90 --mem=4000 --gres=gpu:1 --partition=gpu2-interactive --pty bash -l                                            ```
+
+   
