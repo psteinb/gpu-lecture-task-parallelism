@@ -55,29 +55,38 @@ double parallel_increment_by_one(std::int32_t* data,
     cudaStreamCreate(&el);
   }
 
+  int * h_a[2];
+  for(int s = 0;s < streams.size();++s){
+    checkCudaErrors(cudaHostAlloc((void **)&h_a[s], nbytes/2, cudaHostAllocPortable));
+    std::copy(data+s*(size/2), data+(s+1)*(size/2), h_a[s]);
+  }
+
   // allocate device memory
   int *d_a[2];
   for(int s = 0;s < streams.size();++s){
-    checkCudaErrors(cudaMalloc((void **)&d_a[s], nbytes));
-    checkCudaErrors(cudaMemset(d_a[s], 255, nbytes));
+    checkCudaErrors(cudaMalloc((void **)&d_a[s], nbytes/2));
+    checkCudaErrors(cudaMemset(d_a[s], 255, nbytes/2));
   }
 
   // set kernel launch configuration
   dim3 threads = dim3(512, 1);
   dim3 blocks  = dim3(size / (2*threads.x), 1);
 
-
   auto start = std::chrono::high_resolution_clock::now();
 
   for(int s = 0;s < streams.size();++s){
-    cudaMemcpyAsync(d_a[s], data+s*(size/2), nbytes/2, cudaMemcpyHostToDevice, streams[s]);
+    cudaMemcpyAsync(d_a[s], h_a[s], nbytes/2, cudaMemcpyHostToDevice, streams[s]);
     increment_kernel<<<blocks, threads,0,streams[s]>>>(d_a[s], value);
-    cudaMemcpyAsync( data+s*(size/2),d_a[s], nbytes/2, cudaMemcpyDeviceToHost, streams[s]);
+    cudaMemcpyAsync(h_a[s],d_a[s], nbytes/2, cudaMemcpyDeviceToHost, streams[s]);
   }
+
+  cudaDeviceSynchronize();
 
   auto end = std::chrono::high_resolution_clock::now();
 
   for(int s = 0;s < streams.size();++s){
+    std::copy(h_a[s], h_a[s]+size/2,data+s*(size/2));
+    checkCudaErrors(cudaFreeHost(h_a[s]));
     checkCudaErrors(cudaFree(d_a[s]));
   }
 
@@ -111,5 +120,5 @@ TEST_CASE_METHOD(array_fixture, "compare_times" ) {
   REQUIRE(ints[0] != 0);
   REQUIRE(ints[0] == 2);
 
-  REQUIRE(parallel < serial);
+  REQUIRE(2*parallel <= serial);
 }
