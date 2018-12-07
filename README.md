@@ -6,20 +6,24 @@ Lecture given at TU Dresden on task parallelism with GPUs (CUDA, OpenACC).
 
 First, establish an interactive bash session on a gpu host (attention: the reservation flag will only work during class hours, omit them anytime else):
 
-  + for Dec 11, 2017 
+  + for Dec 10, 2018
   ```
-  $ srun --reservation p_lv_cudaopencl_248 -A p_lv_cudaopencl -t 90 --mem=4000 --gres=gpu:1 --partition=gpu2-interactive --pty bash -l
+  $ srun --reservation StreamsCUDA1 -A p_lv_gpu -t 1:30:00 --mem=4000 --gres=gpu:1 --partition=gpu2-interactive --pty bash -l
   ``` 
   
-  + for Dec 12, 2017
+  + for Dec 11, 2018
   ```
-  $ srun --reservation p_lv_cudaopencl_249 -A p_lv_cudaopencl -t 90 --mem=4000 --gres=gpu:1 --partition=gpu2-interactive --pty bash -l
+  $ srun --reservation StreamsCUDA2 -A p_lv_gpu -t 1:30:00 --mem=4000 --gres=gpu:1 --partition=gpu2-interactive --pty bash -l
   ```
 
-Second, please setup the correct environment (the defaul CUDA on taurus is version `8.0.44` which works at most with gcc `5.3.0`):
+Second, please setup the correct environment (the defaul CUDA on taurus is version `9.2`):
 
 ```
-$ module load cuda gcc/5.3.0 
+$ module add modenv/scs5
+
+Module GCCcore/6.4.0, zlib/1.2.11-GCCcore-6.4.0, cURL/7.58.0-GCCcore-6.4.0, expat/2.2.5-GCCcore-6.4.0, XZ/5.2.3-GCCcore-6.4.0, libxml2/2.9.4-GCCcore-6.4.0, ncurses/6.0-GCCcore-6.4.0, gettext/0.19.8.1-GCCcore-6.4.0, Perl/5.26.1-GCCcore-6.4.0, git/2.18.0-GCCcore-6.4.0 unloaded.
+Module GCCcore/6.4.0, zlib/1.2.11-GCCcore-6.4.0, cURL/7.58.0-GCCcore-6.4.0, expat/2.2.5-GCCcore-6.4.0, XZ/5.2.3-GCCcore-6.4.0, libxml2/2.9.4-GCCcore-6.4.0, ncurses/6.0-GCCcore-6.4.0, gettext/0.19.8.1-GCCcore-6.4.0, Perl/5.26.1-GCCcore-6.4.0, git/2.18.0-GCCcore-6.4.0 loaded.
+$ module load CUDA
 ```
 
 ## Working with the code
