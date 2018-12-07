@@ -16,7 +16,7 @@ First, establish an interactive bash session on a gpu host (attention: the reser
   $ srun --reservation StreamsCUDA2 -A p_lv_gpu -t 1:30:00 --mem=4000 --gres=gpu:1 --partition=gpu2-interactive --pty bash -l
   ```
 
-Second, please setup the correct environment (the defaul CUDA on taurus is version `9.2`):
+Second, please setup the correct environment (the defaul CUDA on taurus is version `9.2.88`):
 
 ```
 $ module add modenv/scs5
@@ -24,6 +24,7 @@ $ module add modenv/scs5
 Module GCCcore/6.4.0, zlib/1.2.11-GCCcore-6.4.0, cURL/7.58.0-GCCcore-6.4.0, expat/2.2.5-GCCcore-6.4.0, XZ/5.2.3-GCCcore-6.4.0, libxml2/2.9.4-GCCcore-6.4.0, ncurses/6.0-GCCcore-6.4.0, gettext/0.19.8.1-GCCcore-6.4.0, Perl/5.26.1-GCCcore-6.4.0, git/2.18.0-GCCcore-6.4.0 unloaded.
 Module GCCcore/6.4.0, zlib/1.2.11-GCCcore-6.4.0, cURL/7.58.0-GCCcore-6.4.0, expat/2.2.5-GCCcore-6.4.0, XZ/5.2.3-GCCcore-6.4.0, libxml2/2.9.4-GCCcore-6.4.0, ncurses/6.0-GCCcore-6.4.0, gettext/0.19.8.1-GCCcore-6.4.0, Perl/5.26.1-GCCcore-6.4.0, git/2.18.0-GCCcore-6.4.0 loaded.
 $ module load CUDA
+Module CUDA/9.2.88 loaded.
 ```
 
 ## Working with the code
