@@ -7,10 +7,13 @@
 #include "helper_cuda.h"
 
 
-__global__ void increment_kernel(int *g_data, int inc_value)
+__global__ void increment_kernel(int *g_data, int inc_value, int size)
 {
   int idx = blockIdx.x * blockDim.x + threadIdx.x;
-  g_data[idx] = g_data[idx] + inc_value;
+  const int dim = blockDim.x * gridDim.x;
+
+  for(; idx < size; idx += dim)
+      g_data[idx] = g_data[idx] + inc_value;
 }
 
 double increment_by_two(std::int32_t* data,
@@ -32,7 +35,7 @@ double increment_by_two(std::int32_t* data,
   auto start = std::chrono::high_resolution_clock::now();
 
   cudaMemcpy(d_a, data, nbytes, cudaMemcpyHostToDevice);
-  increment_kernel<<<blocks, threads>>>(d_a, value);
+  increment_kernel<<<blocks, threads>>>(d_a, value, size /*threads.x*blocks.x*/);
   cudaMemcpy(data, d_a, nbytes, cudaMemcpyDeviceToHost);
 
   auto end = std::chrono::high_resolution_clock::now();
@@ -66,11 +69,12 @@ double streamed_increment_by_two(std::int32_t* data,
   cudaMemcpy(d_a, data, nbytes, cudaMemcpyHostToDevice);
 
   std::vector<cudaStream_t> streams(8);
+  const std::size_t subSize = size/streams.size() /*threads.x*blocks.x*/;
   for(cudaStream_t& stream : streams)
     cudaStreamCreate(&stream);
 
   for(int i = 0;i<streams.size();i++)
-    increment_kernel<<<blocks, threads,0,streams[i]>>>(d_a + i*threads.x*blocks.x, value);
+    increment_kernel<<<blocks, threads,0,streams[i]>>>(d_a + i*subSize, value, subSize);
 
   cudaMemcpy(data, d_a, nbytes, cudaMemcpyDeviceToHost);
   auto end = std::chrono::high_resolution_clock::now();
